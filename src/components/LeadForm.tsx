@@ -70,9 +70,62 @@ export default function LeadForm({
     }
   }, [isOpen]);
 
+  const sendToTelegramDirectly = async (firstName: string, lastName: string, phone: string, packageName: string) => {
+    const token = process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_CHAT_ID;
+
+    if (!token || !chatId) {
+      throw new Error("Telegram credentials not configured in operator lounge");
+    }
+
+    const escapeHtmlCli = (unsafe: string) => {
+      return unsafe
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    };
+
+    const cleanName = escapeHtmlCli(firstName);
+    const cleanRegion = escapeHtmlCli(lastName || "Ko'rsatilmadi");
+    const cleanPhone = escapeHtmlCli(phone);
+    const cleanPackage = escapeHtmlCli(packageName || "Not Selected");
+
+    const textMessage = `
+<b>🌲 NEW BOOKING - WILD NEST 🌲</b>
+      
+👤 <b>Mijoz:</b> ${cleanName}
+📍 <b>Viloyat:</b> ${cleanRegion}
+📞 <b>Telefon:</b> <code>${cleanPhone}</code>
+📦 <b>Tarif:</b> <b>${cleanPackage}</b>
+🕒 <b>Vaqt:</b> ${new Date().toLocaleString("en-US", { timeZone: "Asia/Tashkent" })} (Direct Link)
+
+⛺ <i>Biz bilan unutilmas xotiralar quring!</i> ⛺
+`;
+
+    const telegramUrl = `https://api.telegram.org/bot${token}/sendMessage`;
+    const response = await fetch(telegramUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: chatId,
+        text: textMessage.trim(),
+        parse_mode: "HTML"
+      })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(`Telegram error: ${JSON.stringify(errorData)}`);
+    }
+
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.firstName || !form.phone || !form.lastName) return;
+    if (!form.firstName || !form.phone) return;
 
     setIsSubmitting(true);
     setSubmitStatus("idle");
@@ -86,6 +139,20 @@ export default function LeadForm({
 
       if (response.ok) {
         const data = await response.json();
+        
+        // If the backend says server was successful but failed to send to Telegram,
+        // we try to dispatch directly from the client.
+        if (data.success && !data.sentToTelegram) {
+          console.warn("Backend failed to send to Telegram, attempting client direct dispatch...");
+          try {
+            await sendToTelegramDirectly(form.firstName, form.lastName, form.phone, form.packageName);
+            data.sentToTelegram = true;
+            data.telegramError = undefined;
+          } catch (directErr: any) {
+            console.error("Direct fallback dispatch failed:", directErr);
+          }
+        }
+
         setSubmitStatus("success");
         setResponseDetails(data);
         setForm({
@@ -99,7 +166,17 @@ export default function LeadForm({
         throw new Error("Server returned API status code: " + response.status);
       }
     } catch (err: any) {
-      console.warn("API delivery fell back to offline local storage:", err);
+      console.warn("API delivery fell back to client-side direct dispatch or local storage:", err);
+      
+      let sentDirectly = false;
+      let clientError = "";
+      try {
+        await sendToTelegramDirectly(form.firstName, form.lastName, form.phone, form.packageName);
+        sentDirectly = true;
+      } catch (directErr: any) {
+        console.error("Direct client dispatch failed:", directErr);
+        clientError = directErr.message || String(directErr);
+      }
       
       const fallbackLeadItem = {
         id: "fb-" + Math.random().toString(36).substring(2, 9),
@@ -108,8 +185,8 @@ export default function LeadForm({
         phone: form.phone,
         packageName: form.packageName,
         timestamp: new Date().toISOString(),
-        sentToTelegram: false,
-        telegramError: "Vercel static client mode fallback saved"
+        sentToTelegram: sentDirectly,
+        telegramError: sentDirectly ? undefined : `Vercel static client mode fallback saved. Error: ${clientError}`
       };
 
       try {
@@ -122,8 +199,8 @@ export default function LeadForm({
       setResponseDetails({
         success: true,
         localSaved: true,
-        sentToTelegram: false,
-        telegramError: "Server offline (Running in Client-Only static fallback mode)",
+        sentToTelegram: sentDirectly,
+        telegramError: sentDirectly ? undefined : `Server offline (Direct Dispatch Failed: ${clientError})`,
         lead: fallbackLeadItem
       });
 
@@ -193,11 +270,10 @@ export default function LeadForm({
 
                   <div>
                     <label className="block text-[11px] font-extrabold uppercase tracking-wider text-forest/70 dark:text-warm-cream/70 mb-1.5">
-                      {t.form.lastName} <span className="text-rose-500">*</span>
+                      {t.form.lastName} <span className="text-forest/40 dark:text-warm-cream/40 font-normal">({currentLang === "UZB" ? "Ixtiyoriy" : currentLang === "RUS" ? "Необязательно" : "Optional"})</span>
                     </label>
                     <input
                       type="text"
-                      required
                       placeholder={currentLang === "UZB" ? "Masalan: Jizzax, Toshkent" : currentLang === "RUS" ? "Например: Ташкент, Джизак" : "e.g. Jizzakh, Tashkent"}
                       value={form.lastName}
                       onChange={(e) => setForm({ ...form, lastName: e.target.value })}

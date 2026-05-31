@@ -2,6 +2,9 @@ import { Heart, Users2, Compass, Film, Coffee, Star } from "lucide-react";
 import { Language, translations } from "../types";
 import { motion } from "motion/react";
 
+// Import the custom high-quality cozy glamping campsite setup image
+import cozyCampImage from "../assets/images/wild_nest_about_cozy_camp_1780241786286.png";
+
 interface AboutProps {
   currentLang: Language;
 }
@@ -102,8 +105,8 @@ export default function About({ currentLang }: AboutProps) {
               {/* Image box */}
               <div className="rounded-2xl overflow-hidden relative mb-6">
                 <img
-                  src="https://images.unsplash.com/photo-1455763916899-e8b50eca9967?auto=format&fit=crop&w=1000&q=80"
-                  alt="Do'stlar bilan qiziqarli kechalar"
+                  src={cozyCampImage}
+                  alt="Glamping va shinamlik"
                   referrerPolicy="no-referrer"
                   className="w-full h-64 object-cover transition duration-700 transform group-hover:scale-105"
                 />
