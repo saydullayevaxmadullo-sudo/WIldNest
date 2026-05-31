@@ -1,0 +1,6 @@
+{
+  "name": "Wild Nest",
+  "description": "Premium luxury camping tent rental platform for creating unforgettable nature memories.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
