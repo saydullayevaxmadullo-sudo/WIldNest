@@ -23,6 +23,16 @@ const localLeads: Array<{
 app.use(express.json());
 
 // API endpoints
+// Function to safely escape HTML characters for Telegram
+function escapeHtml(unsafe: string) {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 app.post("/api/lead", async (req, res) => {
   const { firstName, lastName, phone, packageName } = req.body;
 
@@ -49,16 +59,21 @@ app.post("/api/lead", async (req, res) => {
 
   if (token && chatId) {
     try {
-      const textMessage = `
-🌲 *YANGI BAND QILISH - WILD NEST* 🌲
-      
-👤 *Mijoz:* ${firstName}
-📍 *Viloyat:* ${lastName || "Ko'rsatilmadi"}
-📞 *Telefon:* \`${phone}\`
-📦 *Tarif:* *${packageName}*
-🕒 *Vaqt:* ${new Date().toLocaleString("en-US", { timeZone: "Asia/Tashkent" })}
+      const cleanName = escapeHtml(firstName);
+      const cleanRegion = escapeHtml(lastName || "Ko'rsatilmadi");
+      const cleanPhone = escapeHtml(phone);
+      const cleanPackage = escapeHtml(packageName || "Not Selected");
 
-⛺_Biz bilan unutilmas xotiralar quring!_ ⛺
+      const textMessage = `
+<b>🌲 YANGI BAND QILISH - WILD NEST 🌲</b>
+      
+👤 <b>Mijoz:</b> ${cleanName}
+📍 <b>Viloyat:</b> ${cleanRegion}
+📞 <b>Telefon:</b> <code>${cleanPhone}</code>
+📦 <b>Tarif:</b> <b>${cleanPackage}</b>
+🕒 <b>Vaqt:</b> ${new Date().toLocaleString("en-US", { timeZone: "Asia/Tashkent" })}
+
+⛺ <i>Biz bilan unutilmas xotiralar quring!</i> ⛺
 `;
 
       const telegramUrl = `https://api.telegram.org/bot${token}/sendMessage`;
@@ -67,8 +82,8 @@ app.post("/api/lead", async (req, res) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           chat_id: chatId,
-          text: textMessage,
-          parse_mode: "Markdown"
+          text: textMessage.trim(),
+          parse_mode: "HTML"
         })
       });
 

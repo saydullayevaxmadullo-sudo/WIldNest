@@ -118,7 +118,7 @@ export default function Hero({ currentLang, onOpenBooking }: HeroProps) {
           <div className="lg:col-span-5 relative mt-6 lg:mt-0">
             <div className="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-forest dark:border-leaf group">
               <img
-                src="/src/assets/images/wild_nest_hero_1780229669137.png"
+                src="https://images.unsplash.com/photo-1533873984035-25970ab07461?auto=format&fit=crop&w=1200&q=80"
                 alt="Wild Nest Camping Setup"
                 referrerPolicy="no-referrer"
                 className="w-full h-[380px] sm:h-[480px] object-cover transition duration-700 transform group-hover:scale-105"

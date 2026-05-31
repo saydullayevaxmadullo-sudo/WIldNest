@@ -3,6 +3,12 @@ import { Language, translations } from "../types";
 import { Camera, Eye, Heart, Users2, Compass } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 
+// Import the custom high-quality generated images matching the ones you sent
+import friendsCampImage from "../assets/images/wild_nest_friends_camp_1780239638519.png";
+import mountainGlampingImage from "../assets/images/wild_nest_mountain_glamping_1780239663979.png";
+import riverCanopyImage from "../assets/images/wild_nest_river_canopy_1780239685868.png";
+import riverSunsetImage from "../assets/images/wild_nest_river_sunset_1780239707266.png";
+
 interface ResultsProps {
   currentLang: Language;
 }
@@ -31,35 +37,35 @@ export default function Results({ currentLang }: ResultsProps) {
     {
       id: "g2",
       category: "friends",
-      image: "/src/assets/images/wild_nest_bonfire_1780229693080.png",
+      image: friendsCampImage,
       title: currentLang === "UZB" ? "O'tin hidi ostida shinam suhbat" : currentLang === "RUS" ? "Разговоры у костра" : "Bonfire circle with friends",
       location: "Chorvoq suv ombori"
     },
     {
       id: "g3",
       category: "adventure",
-      image: "https://images.unsplash.com/photo-1537905569824-f89f14cceb68?auto=format&fit=crop&w=800&q=80",
-      title: currentLang === "UZB" ? "Tog' cho'qqisida yulduzlar ostida" : currentLang === "RUS" ? "Под звездами гор" : "Under the high peak stars",
+      image: mountainGlampingImage,
+      title: currentLang === "UZB" ? "Tog' bag'ridagi shinam glamping" : currentLang === "RUS" ? "Уютный глэмпинг в объятиях гор" : "Cozy glamping in the mountains",
       location: "Ugom-Chotqol tog'lari"
     },
     {
       id: "g4",
       category: "friends",
-      image: "https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=800&q=80",
-      title: currentLang === "UZB" ? "Tabiat qo'ynidagi ochiq osmon kinoteatri" : currentLang === "RUS" ? "Кинотеатр на природе" : "Nature open air movie night",
+      image: riverCanopyImage,
+      title: currentLang === "UZB" ? "Daryo bo'yidagi soyabonli safari chodiri" : currentLang === "RUS" ? "Сафари-шатёр с навесом у реки" : "Safari canvas canopy tent by the river",
       location: "Zomin tog'lari"
     },
     {
       id: "g5",
       category: "couple",
-      image: "https://images.unsplash.com/photo-1515408320194-59643816c5b2?auto=format&fit=crop&w=800&q=80",
+      image: riverSunsetImage,
       title: currentLang === "UZB" ? "Ko'l bo'yida birinchi tonggi quyosh" : currentLang === "RUS" ? "Новый рассвет у озера" : "First golden sunrise by lake",
       location: "Tuzkon ko'li bo'yi"
     },
     {
       id: "g6",
       category: "adventure",
-      image: "/src/assets/images/wild_nest_hero_1780229669137.png",
+      image: "https://images.unsplash.com/photo-1510312305653-8ed496efae75?auto=format&fit=crop&w=800&q=80",
       title: currentLang === "UZB" ? "To'liq jihozlangan safari glampingi" : currentLang === "RUS" ? "Полный эстетичный глэмпинг" : "Fully rigged safari glamping",
       location: "Chimyon yonbag'irlari"
     }
@@ -141,9 +147,6 @@ export default function Results({ currentLang }: ResultsProps) {
 
                 {/* Info Overlay Panel */}
                 <div className="p-5 text-left">
-                  <span className="text-[10px] font-extrabold uppercase tracking-widest text-warm-gold">
-                    {item.location}
-                  </span>
                   <h3 className="text-sm font-bold text-forest dark:text-warm-cream mt-1 line-clamp-1 font-serif">
                     {item.title}
                   </h3>
